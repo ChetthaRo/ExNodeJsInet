@@ -61,7 +61,9 @@ exports.login = async (req, res) => {
     const { email, _id, status, role } = user;
     const token = jwt.sign(
       { _id, email, status, role },
-      process.env.DB_JWT_TOKEN_KEY
+      process.env.DB_JWT_TOKEN_KEY, {
+      expiresIn: '100d'
+    }
     );
     return res.status(200).send({
       data: { _id, username, email, token },
@@ -71,7 +73,7 @@ exports.login = async (req, res) => {
     //2. Payload
 
     //3. Generate Token
-  } catch (error) {}
+  } catch (error) { }
 };
 exports.approved = async (req, res) => {
   try {
@@ -105,5 +107,5 @@ exports.approved = async (req, res) => {
         success: false,
       });
     }
-  } catch (error) {}
+  } catch (error) { }
 };
