@@ -7,7 +7,7 @@ require("dotenv").config();
 
 exports.register = async (req, res) => {
   try {
-    const { username, password, email, role } = req.body;
+    const { username, password, email, role, status } = req.body;
 
     const OldUser = await User.findOne({ username, email });
     if (OldUser) {
@@ -23,10 +23,11 @@ exports.register = async (req, res) => {
       password: hashPassword,
       email,
       role,
+      status,
     });
     const user = newUser.save();
     return res.status(200).send({
-      data: { _id: user._id, username, email, role },
+      data: { _id: user._id, username, email, role, status },
       message: "create",
       success: true,
     });
@@ -50,6 +51,12 @@ exports.login = async (req, res) => {
         success: false,
       });
     }
+    if (!user.status !== false) {
+      return res.status(400).send({
+        message: "Please contact admin.",
+        success: false,
+      });
+    }
     let checkPassword = await bcrypt.compare(password, user.password);
     if (!checkPassword) {
       console.log("!checkPassword");
@@ -61,19 +68,17 @@ exports.login = async (req, res) => {
     const { email, _id, status, role } = user;
     const token = jwt.sign(
       { _id, email, status, role },
-      process.env.DB_JWT_TOKEN_KEY, {
-      expiresIn: '100d'
-    }
+      process.env.DB_JWT_TOKEN_KEY,
+      {
+        expiresIn: "100d",
+      }
     );
     return res.status(200).send({
       data: { _id, username, email, token },
       message: "login success",
       success: true,
     });
-    //2. Payload
-
-    //3. Generate Token
-  } catch (error) { }
+  } catch (error) {}
 };
 exports.approved = async (req, res) => {
   try {
@@ -88,7 +93,7 @@ exports.approved = async (req, res) => {
 
     if (userAdmin.role === "admin") {
       const userId = await User.findById(req.params.id);
-      if (!userId.status) {
+      if (userId.status === false) {
         userId.status = req.body.status;
         userId.save();
         return res.status(200).send({
@@ -107,5 +112,5 @@ exports.approved = async (req, res) => {
         success: false,
       });
     }
-  } catch (error) { }
+  } catch (error) {}
 };

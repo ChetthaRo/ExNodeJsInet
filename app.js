@@ -7,7 +7,8 @@ require("dotenv").config();
 require("./db");
 var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/users");
-var productRouter = require("./routes/product")
+var productRouter = require("./routes/product");
+var orderRouter = require("./routes/order");
 
 var app = express();
 var cors = require("cors");
@@ -27,6 +28,7 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use("/", indexRouter);
 app.use("/users", usersRouter);
 app.use("/product", productRouter);
+app.use("/order", orderRouter);
 
 const { readdirSync } = require("fs");
 readdirSync("./routes").map((r) => app.use("/api", require("./routes/" + r)));
