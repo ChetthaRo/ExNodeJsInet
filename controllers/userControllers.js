@@ -8,7 +8,7 @@ require("dotenv").config();
 exports.register = async (req, res) => {
   try {
     const { username, password, email, role, status } = req.body;
-
+    console.log("req.body :", req.body);
     const OldUser = await User.findOne({ username, email });
     if (OldUser) {
       return res.send({
@@ -16,8 +16,9 @@ exports.register = async (req, res) => {
         success: false,
       });
     }
-
+    console.log("on hashPaas");
     const hashPassword = await bcrypt.hash(password, 10);
+    console.log("pass hashPaas");
     const newUser = new User({
       username,
       password: hashPassword,
@@ -113,4 +114,78 @@ exports.approved = async (req, res) => {
       });
     }
   } catch (error) {}
+};
+
+exports.getuser = async (req, res) => {
+  try {
+    const users = await User.find();
+
+    // if (products === undefined) {
+    //   return res.status(500).send({
+    //     message: "not fount product",
+    //     success: false,
+    //   });
+    // }
+
+    return res.status(200).send({
+      message: "success",
+      success: true,
+      data: users,
+    });
+  } catch (error) {
+    return res.status(500).send({
+      message: "fail",
+      success: false,
+    });
+  }
+};
+
+exports.updateToUser = async (req, res) => {
+  console.log("updateToUser :");
+  try {
+    const { id } = req.params;
+    const { username, email, role } = req.body;
+    console.log("id :", id);
+    console.log("req.body :", req.body);
+
+    let UserUpdate = await User.findByIdAndUpdate(
+      id,
+      {
+        username: username,
+        email: email,
+        role: role,
+      },
+      { new: true }
+    );
+
+    return res.status(200).send({
+      data: UserUpdate,
+      message: "Update User success",
+      success: true,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).send({
+      message: "Update User fail",
+      success: false,
+    });
+  }
+};
+
+exports.deleteUserById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    await User  .findByIdAndDelete(id);
+
+    return res.status(200).send({
+      message: "Delete Product success",
+      success: true,
+    });
+  } catch (error) {
+    return res.status(500).send({
+      message: "Delete Product fail",
+      success: false,
+    });
+  }
 };
